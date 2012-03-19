@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe MeasReceiver do
+describe MeasReceiver::Receiver do
   it "simple" do
     true.should
   end
