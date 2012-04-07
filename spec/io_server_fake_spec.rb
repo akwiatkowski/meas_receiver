@@ -3,31 +3,51 @@ require 'io_server_fake'
 require 'yaml'
 
 describe IoServerFake do
-  before :each do
-    # responses has to be defined before starting server, fork, thread and other ruby stuff
-  end
-
-  after :each do
-    @i.stop_tcp_server
-  end
-
   it "should has default response" do
     @i = IoServerFake.new
     @i.start_tcp_server
-
+    @i.stop_tcp_server
   end
 
-  it "should add simple predefined response" do
+  # this is not compatible with current version of HomeIO firmware
+  it "should get default response" do
     @i = IoServerFake.new
     @i.start_tcp_server
-    # some issues with tcp server
-    sleep 0.005
 
     m_command = MeasReceiver::CommProtocol.prepare_command_string(['1'], 1)
     m_response = MeasReceiver::CommProtocol.i_to_byte_array(0, 1)
     res = MeasReceiver::CommProtocol.send_command(m_command, 'localhost', @i.port)
-    puts res.inspect
     res.should == m_response
+
+    @i.stop_tcp_server
+  end
+
+  it "should set response" do
+    @i = IoServerFake.new
+    @i.responses.should be_kind_of(Hash)
+    command = 0.chr
+
+    # Array
+    a = [1, 2, 3, 4]
+    @i.responses[command] = a
+    @i.responses[command].should == a
+
+    @i.get_response(command).should == 1
+    @i.get_response(command).should == 2
+    @i.get_response(command).should == 3
+    10.times do
+      @i.get_response(command).should == 4
+    end
+
+    # Proc
+    a = Proc.new{ 2 }
+    @i.responses[command] = a
+    @i.responses[command].should == a
+    10.times do
+      @i.get_response(command).should == 2
+    end
+
+
   end
 
 

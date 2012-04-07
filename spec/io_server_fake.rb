@@ -15,6 +15,7 @@ class IoServerFake
 
   def start_tcp_server
     @thread = Thread.new(@responses) { |_responses| start_tcp_server_in_thread(_responses) }
+    sleep 0.005
   end
 
   # Start server in current thread
@@ -30,7 +31,7 @@ class IoServerFake
           response = get_response(command)
           #puts response.to_yaml
           s.write(response)
-        #rescue => e
+            #rescue => e
         ensure
           s.close
         end
@@ -52,34 +53,29 @@ class IoServerFake
     0.chr * size
   end
 
-  # Add predefined response
-  def add_response(k,v)
-    @responses[k] = Array.new if @responses[k].nil?
-    @responses[k] << v
-  end
-
   # Get current predefined response
   def get_response(k)
-    # TODO rewrite to Proc objects
+    if @responses[k].nil?
+      # not compatible with firmware
+      current_response = default_response
+    else
+      response_obj = @responses[k]
+      current_response = default_response
 
-    #puts @responses[k].to_yaml
-    #puts @responses[k].class
+      # return first, and remove if there are more, if not return every time the last one
+      if response_obj.kind_of?(Array)
+        current_response = response_obj.first
 
-    # should be already an Array
-    @responses[k] = Array.new if @responses[k].nil?
-    # if nothing is defined default response is char equal to 0
-    @responses[k] << default_response if @responses[k].size == 0
+        if response_obj.size > 1
+          response_obj.shift
+        end
+      end
 
-    puts @responses[k].to_yaml
-    #puts @responses[k].first
+      if response_obj.kind_of?(Proc)
+        current_response = response_obj.call
+      end
 
-    current_response = @responses[k].first
-
-    # always let last stay
-    if @responses[k].size > 1
-      @responses[k].shift
     end
-
     return current_response
   end
 
