@@ -1,6 +1,6 @@
 = meas_receiver
 
-Simple gem for receiving measurements using HomeIO protocol. It is part of HomeIO.
+Simple gem for receiving measurements using HomeIO protocol. It is / will be part of HomeIO.
 
 == Contributing to meas_receiver
  

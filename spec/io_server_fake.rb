@@ -1,25 +1,34 @@
 require 'singleton'
+require 'yaml'
 
 class IoServerFake
-  include Singleton
+  #include Singleton
 
   PORT = 12345
 
   def initialize
     @port = PORT
+    @responses = Hash.new
   end
 
-  attr_reader :port
+  attr_reader :port, :responses
 
   def start_tcp_server
-    dts = TCPServer.new(port)
+    @thread = Thread.new(@responses) { |_responses| start_tcp_server_in_thread(_responses) }
+  end
+
+  # Start server in current thread
+  def start_tcp_server_in_thread(_responses)
+    @responses = _responses
+    @dts = TCPServer.new(port)
 
     loop do
-      Thread.start(dts.accept) do |s|
+      Thread.start(@dts.accept) do |s|
         begin
-          puts s.class
           command = s.gets
-          response = '01' # TODO
+          #puts "4"*100, @responses.to_yaml
+          response = get_response(command)
+          #puts response.to_yaml
           s.write(response)
         #rescue => e
         ensure
@@ -29,13 +38,48 @@ class IoServerFake
     end
   end
 
-  def receive_command
-
+  # Kill server thread
+  def stop_tcp_server
+    begin
+      @dts.close
+    rescue
+    end
+    @thread.kill
   end
 
-  def send_command
-
+  # Default response when nothing is defined
+  def default_response
+    0.chr
   end
 
+  # Add predefined response
+  def add_response(k,v)
+    @responses[k] = Array.new if @responses[k].nil?
+    @responses[k] << v
+  end
+
+  # Get current predefined response
+  def get_response(k)
+    #puts @responses[k].to_yaml
+    #puts @responses[k].class
+
+    # should be already an Array
+    #@responses[k] = Array.new if @responses[k].nil?
+    # if nothing is defined default response is char equal to 0
+    #@responses[k] << default_response if @responses[k].size == 0
+
+
+    puts @responses[k].to_yaml
+    #puts @responses[k].first
+
+    current_response = '09' #@responses[k].first.clone
+
+    # always let last stay
+    if @responses[k].size > 1
+      @responses[k].shift
+    end
+
+    return current_response
+  end
 
 end
