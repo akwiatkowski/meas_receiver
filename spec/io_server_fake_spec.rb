@@ -11,11 +11,23 @@ describe IoServerFake do
     @i.stop_tcp_server
   end
 
+  it "should has default response" do
+    @i = IoServerFake.new
+    @i.start_tcp_server
+
+  end
+
   it "should add simple predefined response" do
     @i = IoServerFake.new
     @i.start_tcp_server
     # some issues with tcp server
     sleep 0.005
+
+    m_command = MeasReceiver::CommProtocol.prepare_command_string(['1'], 1)
+    m_response = MeasReceiver::CommProtocol.i_to_byte_array(0, 1)
+    res = MeasReceiver::CommProtocol.send_command(m_command, 'localhost', @i.port)
+    puts res.inspect
+    res.should == m_response
   end
 
 

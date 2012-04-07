@@ -48,8 +48,8 @@ class IoServerFake
   end
 
   # Default response when nothing is defined
-  def default_response
-    0.chr
+  def default_response(size = 1)
+    0.chr * size
   end
 
   # Add predefined response
@@ -60,19 +60,20 @@ class IoServerFake
 
   # Get current predefined response
   def get_response(k)
+    # TODO rewrite to Proc objects
+
     #puts @responses[k].to_yaml
     #puts @responses[k].class
 
     # should be already an Array
-    #@responses[k] = Array.new if @responses[k].nil?
+    @responses[k] = Array.new if @responses[k].nil?
     # if nothing is defined default response is char equal to 0
-    #@responses[k] << default_response if @responses[k].size == 0
-
+    @responses[k] << default_response if @responses[k].size == 0
 
     puts @responses[k].to_yaml
     #puts @responses[k].first
 
-    current_response = '09' #@responses[k].first.clone
+    current_response = @responses[k].first
 
     # always let last stay
     if @responses[k].size > 1
