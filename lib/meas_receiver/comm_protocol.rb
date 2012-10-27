@@ -3,9 +3,21 @@ require 'socket'
 module MeasReceiver
   class CommProtocol
 
+    @@host = 'localhost'
+    @@port = '2002'
+
+    class << self
+      attr_accessor :host, :port
+    end
+
     # Create String command to IoServer and send it
-    def self.create_send_command(command_array, response_size, hostname, port)
+    def self.create_send_command(command_array, response_size, hostname = @@host, port = @@port)
+      str = prepare_command_string(command_array, response_size)
       return send_command(str, hostname, port)
+    end
+
+    def self.create_and_send_command(command_array, response_size, hostname = @@host, port = @@port)
+      create_send_command(command_array, response_size, hostname, port)
     end
 
     # Send command to IoServer and send it

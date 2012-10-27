@@ -11,6 +11,10 @@ class IoServerFake
     @responses = Hash.new
   end
 
+  def host
+    'localhost'
+  end
+
   attr_reader :port, :responses
 
   def start_tcp_server
