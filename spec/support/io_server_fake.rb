@@ -17,7 +17,13 @@ class IoServerFake
 
   attr_reader :port, :responses
 
-  def add_response(command_string, response)
+  def add_response(command, response_size, value)
+    command_string = MeasReceiver::CommProtocol.prepare_command_string(command, response_size)
+    value_string = MeasReceiver::CommProtocol.i_to_byte_array(value, response_size)
+    add_response_raw(command_string, value_string)
+  end
+
+  def add_response_raw(command_string, response)
     @responses[command_string] ||= Array.new
     @responses[command_string] << response
   end

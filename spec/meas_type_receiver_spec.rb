@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe MeasTypeReceiver do
+describe MeasReceiver::MeasTypeReceiver do
   before :each do
-    meas_config = {
+    mc = {
       name: 'u_batt',
       unit: 'V',
       fetch_interval: 0.2,
@@ -12,15 +12,13 @@ describe MeasTypeReceiver do
 
     @default_value = 512
     @i ||= IoServerFake.new
-    command_string = MeasReceiver::CommProtocol.prepare_command_string(meas_config[:command], meas_config[:response_size])
-    value_string = MeasReceiver::CommProtocol.i_to_byte_array(@default_value, meas_config[:response_size])
-    @i.add_response(command_string, value_string)
-    
+    @i.add_response(mc[:command], mc[:response_size], @default_value)
+
     @i.start_tcp_server
     MeasReceiver::CommProtocol.host = @i.host
     MeasReceiver::CommProtocol.port = @i.port
 
-    @m = MeasTypeReceiver.new(meas_config)
+    @m = MeasReceiver::MeasTypeReceiver.new(mc)
   end
 
   after :each do

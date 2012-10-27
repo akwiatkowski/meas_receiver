@@ -3,8 +3,24 @@ require 'socket'
 module MeasReceiver
   class CommProtocol
 
+    def initialize(_command, _response_size)
+      @command = _command
+      @response_size = _response_size
+      @command_string = self.class.prepare_command_string(_command, _response_size)
+    end
+
+    def g
+      get
+    end
+
+    def get
+      d = self.class.send_command(@command_string)
+      return d
+      return self.class.byte_array_to_i(d)
+    end
+
     @@host = 'localhost'
-    @@port = '2002'
+    @@port = '12345'
 
     def self.port=(_port)
       @@port = _port
@@ -17,6 +33,7 @@ module MeasReceiver
     # Create String command to IoServer and send it
     def self.create_send_command(command_array, response_size, hostname = @@host, port = @@port)
       str = prepare_command_string(command_array, response_size)
+      puts "command_string2 #{str.inspect}"
       return send_command(str, hostname, port)
     end
 
@@ -25,7 +42,7 @@ module MeasReceiver
     end
 
     # Send command to IoServer and send it
-    def self.send_command(command_byte_array, hostname, port)
+    def self.send_command(command_byte_array, hostname = @@host, port = @@port)
       s = TCPSocket.open(hostname, port)
       s.puts(command_byte_array)
       data = s.gets
