@@ -24,7 +24,7 @@ module MeasReceiver
     end
 
     def [](i)
-      {time: @time_to + interval, value: @buffer[0]}
+      {time: @time_from + interval * i, value: @buffer[i]}
     end
 
     def first

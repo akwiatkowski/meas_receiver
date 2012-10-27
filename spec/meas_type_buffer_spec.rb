@@ -30,6 +30,15 @@ describe MeasReceiver::MeasTypeBuffer do
     # interval
     @b.interval.should be_within(0.01).of(0.2)
 
+    # times, first and last
+    @b.first[:time].should be_within(0.5).of(@b.time_from)
+    @b.last[:time].should be_within(0.5).of(@b.time_to)
+    @b.buffer[0][:time].should be_within(0.5).of(@b.time_from)
+    @b.buffer[@b.buffer.size - 1][:time].should be_within(0.5).of(@b.time_to)
+
+    @b.first[:time]
+    @b.last[:value]
+
     # first
     puts @b.first.inspect
 
