@@ -14,7 +14,24 @@ describe MeasReceiver::MeasTypeBuffer do
     @b = @m.meas_buffer
   end
 
-  it "simple stuff" do
+  it "kind of" do
     @b.should be_kind_of(MeasReceiver::MeasTypeBuffer)
+  end
+
+  it "store values" do
+    count = 1000
+    (0...count).each do |i|
+      v = 38.0 + Math.sin(i.to_f / 20.0) * 5.0
+      @b.add(v)
+    end
+    @b.time_from = Time.now - count.to_f * 0.2
+    @b.time_to = Time.now
+
+    # interval
+    @b.interval.should be_within(0.01).of(0.2)
+
+    # first
+    puts @b.first.inspect
+
   end
 end
