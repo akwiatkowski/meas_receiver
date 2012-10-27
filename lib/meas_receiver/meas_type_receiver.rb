@@ -35,9 +35,18 @@ module MeasReceiver
     end
 
     def fetch
-      d = @comm_object.g
+      v = @comm_object.g
+      add_measurement(v)
     end
 
     attr_reader :meas_buffer
+
+    def add_measurement(v)
+      @meas_buffer << v
+      @time_from ||= Time.now
+      @time_to = Time.now
+    end
+
+
   end
 end

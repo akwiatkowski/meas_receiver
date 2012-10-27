@@ -15,7 +15,6 @@ module MeasReceiver
 
     def get
       d = self.class.send_command(@command_string)
-      return d
       return self.class.byte_array_to_i(d)
     end
 
