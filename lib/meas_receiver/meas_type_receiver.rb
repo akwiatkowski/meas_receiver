@@ -1,4 +1,5 @@
 require 'rufus/scheduler'
+require 'meas_receiver/meas_type_buffer'
 
 module MeasReceiver
   class MeasTypeReceiver
@@ -16,8 +17,7 @@ module MeasReceiver
       @command = _options[:command]
       @response_size = _options[:response_size]
 
-      @meas_buffer = Array.new
-
+      @meas_buffer = MeasTypeBuffer.new(self)
       @comm_object = CommProtocol.new(@command, @response_size)
     end
 
@@ -36,17 +36,10 @@ module MeasReceiver
 
     def fetch
       v = @comm_object.g
-      add_measurement(v)
+      @meas_buffer.add(v)
     end
 
     attr_reader :meas_buffer
-
-    def add_measurement(v)
-      @meas_buffer << v
-      @time_from ||= Time.now
-      @time_to = Time.now
-    end
-
 
   end
 end
