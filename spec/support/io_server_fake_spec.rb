@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'io_server_fake'
+require 'support/io_server_fake'
 require 'yaml'
 
 describe IoServerFake do

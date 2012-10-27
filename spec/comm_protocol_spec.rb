@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'io_server_fake'
+require 'support/io_server_fake'
 
 describe MeasReceiver::CommProtocol do
   it "should convert byte array to number" do
