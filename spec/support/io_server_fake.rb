@@ -17,6 +17,11 @@ class IoServerFake
 
   attr_reader :port, :responses
 
+  def add_response(command_string, response)
+    @responses[command_string] ||= Array.new
+    @responses[command_string] << response
+  end
+
   def start_tcp_server
     @thread = Thread.new(@responses) { |_responses| start_tcp_server_in_thread(_responses) }
     sleep 0.005
@@ -31,11 +36,12 @@ class IoServerFake
       Thread.start(@dts.accept) do |s|
         begin
           command = s.gets
-          #puts "4"*100, @responses.to_yaml
-          response = get_response(command)
-          #puts response.to_yaml
+          # there is added \n at the end
+          response = get_response(command.strip)
           s.write(response)
-            #rescue => e
+        rescue => e
+          puts e.message
+          raise e
         ensure
           s.close
         end
@@ -59,9 +65,10 @@ class IoServerFake
 
   # Get current predefined response
   def get_response(k)
+    size = k[1].ord
     if @responses[k].nil?
       # not compatible with firmware
-      current_response = default_response
+      current_response = default_response(size)
     else
       response_obj = @responses[k]
       current_response = default_response

@@ -6,8 +6,12 @@ module MeasReceiver
     @@host = 'localhost'
     @@port = '2002'
 
-    class << self
-      attr_accessor :host, :port
+    def self.port=(_port)
+      @@port = _port
+    end
+
+    def self.host=(_host)
+      @@host = _host
     end
 
     # Create String command to IoServer and send it
@@ -26,7 +30,6 @@ module MeasReceiver
       s.puts(command_byte_array)
       data = s.gets
       s.close
-
       return data
     end
 
@@ -38,7 +41,7 @@ module MeasReceiver
       elsif command_array.kind_of?(String)
         command_byte_array = command_array.split(//)
       elsif command_array.kind_of?(Fixnum)
-        command_byte_array = [ command_array.chr ]
+        command_byte_array = [command_array.chr]
       else
         raise ArgumentError
       end
