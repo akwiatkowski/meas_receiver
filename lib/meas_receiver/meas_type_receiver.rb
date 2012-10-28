@@ -16,12 +16,14 @@ module MeasReceiver
 
       @command = _options[:command]
       @response_size = _options[:response_size]
+      @coefficients = _options[:coefficients]
 
-      @meas_buffer = MeasTypeBuffer.new(self)
+
       @comm_object = CommProtocol.new(@command, @response_size)
+      @meas_buffer = MeasTypeBuffer.new(self)
     end
 
-    attr_reader :fetch_interval, :command, :response_size
+    attr_reader :fetch_interval, :command, :response_size, :coefficients
 
     def start
       @scheduler = Rufus::Scheduler.start_new(frequency: SCH_MIN_INTERVAL)

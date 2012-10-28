@@ -8,6 +8,12 @@ describe MeasReceiver::MeasTypeBuffer do
       fetch_interval: 0.2,
       command: ['0'],
       response_size: 2,
+
+      coefficients: {
+        linear: 0.0777126099706744868,
+        offset: 0
+      }
+
     }
 
     @m = MeasReceiver::MeasTypeReceiver.new(mc)
@@ -21,7 +27,7 @@ describe MeasReceiver::MeasTypeBuffer do
   it "store values" do
     count = 1000
     (0...count).each do |i|
-      v = 38.0 + Math.sin(i.to_f / 20.0) * 5.0
+      v = 512 + (Math.sin(i.to_f / 20.0) * 64.0).round
       @b.add(v)
     end
     @b.time_from = Time.now - count.to_f * 0.2
@@ -33,14 +39,11 @@ describe MeasReceiver::MeasTypeBuffer do
     # times, first and last
     @b.first[:time].should be_within(0.5).of(@b.time_from)
     @b.last[:time].should be_within(0.5).of(@b.time_to)
-    @b.buffer[0][:time].should be_within(0.5).of(@b.time_from)
-    @b.buffer[@b.buffer.size - 1][:time].should be_within(0.5).of(@b.time_to)
 
-    @b.first[:time]
-    @b.last[:value]
-
-    # first
-    puts @b.first.inspect
+    # time, raw and value
+    @b.first[:time].should be_kind_of(Time)
+    @b.first[:raw].should be_kind_of(Fixnum)
+    @b.first[:value].should be_kind_of(Float)
 
   end
 end
