@@ -19,8 +19,8 @@ describe MeasReceiver::MeasTypeBuffer do
         min_time_interval: 0.5,
         max_time_interval: 3600,
 
-        avg_side_count: 3, # 3 before, this, and 3 after
-        value_deviation: 0.3
+        avg_side_count: 4, # 3 before, this, and 3 after
+        value_deviation: 0.8
       }
 
     }
