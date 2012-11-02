@@ -19,7 +19,11 @@ module MeasReceiver
       @coefficients = _options[:coefficients] || Hash.new
       @coefficients[:linear] ||= 1.0
       @coefficients[:offset] ||= 0.0
-      @storage = _options[:storage]
+      @storage = _options[:storage] || Hash.new
+      @storage[:min_time_interval] ||= @fetch_interval
+      @storage[:min_unit_interval] = (@storage[:min_time_interval] / @fetch_interval).floor
+      @storage[:max_time_interval] ||= 3600
+      @storage[:max_unit_interval] = (@storage[:max_time_interval] / @fetch_interval).floor
 
       @comm_object = CommProtocol.new(@command, @response_size)
       @meas_buffer = MeasTypeBuffer.new(self)

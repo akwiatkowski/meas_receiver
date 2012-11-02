@@ -53,7 +53,7 @@ module MeasReceiver
       self[@size - 1]
     end
 
-    def averaged_raw(i, count = @storage[:avg_side_count].to_i)
+    def averaged_raw(i, count = @storage[:avg_side_count])
       _from = i - count
       _to = i + count
 
@@ -67,7 +67,7 @@ module MeasReceiver
     end
 
     # Get mean value within buffer
-    def averaged_value(i, count = @storage[:avg_side_count].to_i)
+    def averaged_value(i, count = @storage[:avg_side_count])
       raw_to_value(averaged_raw(i, count))
     end
 
@@ -81,7 +81,7 @@ module MeasReceiver
       _avg = storage_calculate_averaged(_range)
       _ids = storage_get_is_to_store(_avg, _range)
 
-      #puts _ids.inspect
+      puts _ids.inspect
 
       _avg.each_with_index do |r,i|
         #puts r
@@ -113,14 +113,23 @@ module MeasReceiver
       _range.collect{|i| averaged_value(i)}
     end
 
+    # Store if value if different more than X and is newer tan Y, force when it is newer than Z
+    def storage_should_store?(_value, _ref_value, _value_time, _ref_value_time)
+      (is_different(_ref_value, _value) and (_value_time - _ref_value_time) > @storage[:min_unit_interval]) or (_value_time - _ref_value_time) > @storage[:max_unit_interval]
+    end
+
     def storage_get_is_to_store(_values, _range)
       _array = Array.new
+      _rel_time = _range.first
       _ref_value = _values.first
-      (0...(_values.size)).each do |i|
-        v = _values[i]
-        if is_different(_ref_value, v)
-          _array << i + _range.first
-          _ref_value = v
+      _ref_value_rel_time = 0
+
+      (0...(_values.size)).each do |_value_rel_time|
+        _value = _values[_value_rel_time]
+        if storage_should_store?(_value, _ref_value, _value_rel_time, _ref_value_rel_time)
+          _array << _value_rel_time + _rel_time
+          _ref_value = _value
+          _ref_value_rel_time = _value_rel_time
         end 
       end
       return _array
