@@ -1,6 +1,7 @@
 source "http://rubygems.org"
 
 gem "rufus-scheduler"
+gem "mean"
 
 group :development do
   gem "rspec", "~> 2.3.0"

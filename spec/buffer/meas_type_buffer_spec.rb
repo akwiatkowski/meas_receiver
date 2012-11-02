@@ -19,7 +19,7 @@ describe MeasReceiver::MeasTypeBuffer do
         min_time_interval: 0.5,
         max_time_interval: 3600,
 
-        avg_count: 5,
+        avg_side_count: 3, # 3 before, this, and 3 after
         value_deviation: 0.3
       }
 
@@ -55,6 +55,10 @@ describe MeasReceiver::MeasTypeBuffer do
     @b.first[:time].should be_kind_of(Time)
     @b.first[:raw].should be_kind_of(Fixnum)
     @b.first[:value].should be_kind_of(Float)
+
+    # perform storage
+    @b.perform_storage
+    puts @b.storage_last_i
 
   end
 end
