@@ -12,9 +12,20 @@ describe MeasReceiver::MeasTypeBuffer do
       coefficients: {
         linear: 0.0777126099706744868,
         offset: 0
+      },
+
+      storage: {
+        proc: Proc.new { |d| puts d.inspect },
+        min_time_interval: 0.5,
+        max_time_interval: 3600,
+
+        avg_count: 5,
+        value_deviation: 0.3
       }
 
     }
+
+    # TODO: storage, clean
 
     @m = MeasReceiver::MeasTypeReceiver.new(mc)
     @b = @m.meas_buffer

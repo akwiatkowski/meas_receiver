@@ -8,12 +8,13 @@ module MeasReceiver
       @meas_type = _meas_type
 
       @coefficients = _meas_type.coefficients
+      @storage = _meas_type.storage
 
       @buffer = Array.new
       @size = 0
     end
 
-    attr_accessor :buffer, :time_from, :time_to, :coefficients
+    attr_accessor :buffer, :time_from, :time_to, :coefficients, :storage
 
     # add raw value
     def add(v)
@@ -45,6 +46,11 @@ module MeasReceiver
 
     def last
       self[@size - 1]
+    end
+
+    # Executed by scheduler to store important values
+    def perform_storage
+
     end
 
   end
