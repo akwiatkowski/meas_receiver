@@ -53,7 +53,8 @@ module MeasReceiver
       self[@size - 1]
     end
 
-    def averaged_raw(i, count = @storage[:avg_side_count])
+    # Average/mean raw within buffer
+    def mean_raw(i, count = @storage[:avg_side_count])
       _from = i - count
       _to = i + count
 
@@ -61,45 +62,29 @@ module MeasReceiver
       _from = 0 if _from < 0
       _to = @buffer.size - 1 if _to >= @buffer.size
       _a = @buffer[_from..._to]
-      # puts "#{i}: #{_from}-#{_to}, size #{_to - _from}, mean #{_a.mean}, #{@buffer[_from]}, #{@buffer[_to]}"
 
       return _a.mean
     end
 
     # Get mean value within buffer
-    def averaged_value(i, count = @storage[:avg_side_count])
-      raw_to_value(averaged_raw(i, count))
-    end
-
-    def is_different(value_a, value_b)
-      (value_a - value_b).abs > @storage[:value_deviation].to_f
+    def mean_value(i, count = @storage[:avg_side_count])
+      raw_to_value(mean_raw(i, count))
     end
 
     # Executed by scheduler to store important values
     def perform_storage
       _range = storage_calculate_range
       _avg = storage_calculate_averaged(_range)
-      _ids = storage_get_is_to_store(_avg, _range)
+      _indexes = storage_get_is_to_store(_avg, _range)
+      _m = storage_measurements_to_store(_indexes)
 
-      puts _ids.inspect
-
-      _avg.each_with_index do |r,i|
-        #puts r
-      end
-
-      return
-      _first_value = averaged_value(_from)
-      (_from.._to).each do |i|
-        _a = averaged_value(i)
-        #puts _first_value - _a
-        #puts is_different(_a, _first_value)
-      end
+      puts _m.inspect
 
       # mark from where continue next time
       @storage_last_i = current_last_i
-
     end
 
+    # Calculate range to storage algorithm
     def storage_calculate_range
       # from where continue
       @storage_last_i = @storage_last_i.to_i
@@ -109,15 +94,22 @@ module MeasReceiver
       return _from.._to
     end
 
+    # Prepare averaged values
     def storage_calculate_averaged(_range)
-      _range.collect{|i| averaged_value(i)}
+      _range.collect{|i| mean_value(i)}
+    end
+
+    # Check value deviation
+    def storage_should_store_value?(value_a, value_b)
+      (value_a - value_b).abs > @storage[:value_deviation].to_f
     end
 
     # Store if value if different more than X and is newer tan Y, force when it is newer than Z
     def storage_should_store?(_value, _ref_value, _value_time, _ref_value_time)
-      (is_different(_ref_value, _value) and (_value_time - _ref_value_time) > @storage[:min_unit_interval]) or (_value_time - _ref_value_time) > @storage[:max_unit_interval]
+      (storage_should_store_value?(_ref_value, _value) and (_value_time - _ref_value_time) > @storage[:min_unit_interval]) or (_value_time - _ref_value_time) > @storage[:max_unit_interval]
     end
 
+    # Array of indexes measurements to store
     def storage_get_is_to_store(_values, _range)
       _array = Array.new
       _rel_time = _range.first
@@ -133,6 +125,10 @@ module MeasReceiver
         end 
       end
       return _array
+    end
+
+    def storage_measurements_to_store(_indexes)
+
     end
 
   end
