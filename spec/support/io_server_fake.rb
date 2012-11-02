@@ -71,9 +71,9 @@ class IoServerFake
 
   # Get current predefined response
   def get_response(k)
-    size = k[1].ord
     if @responses[k].nil?
-      # not compatible with firmware
+      # not compatible with firmware, should be?
+      size = k[1].ord
       current_response = default_response(size)
     else
       response_obj = @responses[k]
