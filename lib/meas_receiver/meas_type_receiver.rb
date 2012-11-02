@@ -16,9 +16,10 @@ module MeasReceiver
 
       @command = _options[:command]
       @response_size = _options[:response_size]
-      @coefficients = _options[:coefficients]
+      @coefficients = _options[:coefficients] || Hash.new
+      @coefficients[:linear] ||= 1.0
+      @coefficients[:offset] ||= 0.0
       @storage = _options[:storage]
-
 
       @comm_object = CommProtocol.new(@command, @response_size)
       @meas_buffer = MeasTypeBuffer.new(self)
@@ -40,9 +41,22 @@ module MeasReceiver
     def fetch
       v = @comm_object.g
       @meas_buffer.add(v)
+      return v
     end
 
     attr_reader :meas_buffer
+
+    def [](i)
+      @meas_buffer[i]
+    end
+
+    def first
+      @meas_buffer.first
+    end
+
+    def last
+      @meas_buffer.last
+    end
 
   end
 end

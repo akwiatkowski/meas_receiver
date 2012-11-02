@@ -27,13 +27,14 @@ describe MeasReceiver::MeasTypeReceiver do
     end
 
     it "has array of measurements" do
-      @m.meas_buffer.should be_kind_of(Array)
+      @m.meas_buffer.buffer.should be_kind_of(Array)
     end
 
     it "fetch single measurements" do
-      d = @m.fetch
-      v = MeasReceiver::CommProtocol.byte_array_to_i(d)
-      v.should == @default_value
+      @m.fetch
+      d = @m.last[:raw]
+      d.should be_kind_of Fixnum
+      d.should == @default_value
     end
   end
 end
