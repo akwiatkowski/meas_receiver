@@ -37,8 +37,11 @@ describe MeasReceiver::MeasTypeReceiver do
       sleep 1
       @m.stop
 
-      puts @m.meas_buffer.to_yaml
-      #@m.meas_buffer.size.should > 0
+      raws = @m.meas_buffer.buffer
+      raws.size.should > 0
+
+      raws.first.should == @m.first[:raw]
+      raws.last.should == @m.last[:raw]
     end
     
   end
