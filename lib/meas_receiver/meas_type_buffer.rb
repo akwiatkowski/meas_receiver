@@ -128,7 +128,9 @@ module MeasReceiver
     end
 
     def storage_measurements_to_store(_indexes)
+      _m = _indexes.collect{|i| self[i]}
 
+      return _m
     end
 
   end
