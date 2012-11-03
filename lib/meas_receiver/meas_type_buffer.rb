@@ -76,12 +76,12 @@ module MeasReceiver
       _range = storage_calculate_range
       _avg = storage_calculate_averaged(_range)
       _indexes = storage_get_is_to_store(_avg, _range)
-      _m = storage_measurements_to_store(_indexes)
+      _m = storage_measurements_to_store(_indexes, _range)
 
       puts _m.inspect
 
       # mark from where continue next time
-      #@storage_last_i = current_last_i
+      @storage_last_i = _indexes.last
     end
 
     # Calculate range to storage algorithm
@@ -96,7 +96,7 @@ module MeasReceiver
 
     # Prepare averaged values
     def storage_calculate_averaged(_range)
-      _range.collect{|i| mean_value(i)}
+      _range.collect { |i| mean_value(i) }
     end
 
     # Check value deviation
@@ -122,13 +122,26 @@ module MeasReceiver
           _array << _value_rel_time + _rel_time
           _ref_value = _value
           _ref_value_rel_time = _value_rel_time
-        end 
+        end
       end
       return _array
     end
 
-    def storage_measurements_to_store(_indexes)
-      _m = _indexes.collect{|i| self[i]}
+    # Fill time_from using previous measurement
+    def storage_measurements_to_store(_indexes, _range)
+      _t = self[_range.first]
+      _m = _indexes.collect { |i| self[i] }
+
+      _m.each do |m|
+        m[:time_from] = _t[:time]
+        m[:time_to] = m[:time]
+
+        _t = m
+      end
+
+      _m.each do |m|
+        m.delete(:time)
+      end
 
       return _m
     end
