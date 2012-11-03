@@ -89,8 +89,9 @@ module MeasReceiver
       _m = storage_measurements_to_store(_indexes, _range)
       @storage_buffer = _m
 
-      # mark from where continue next time
-      @storage_last_i = _indexes.last
+      # mark from where continue next time, it is r
+      puts _indexes.inspect
+      @storage_last_i = _indexes.last[1]
 
       # call proc
       if @storage[:proc]
@@ -154,9 +155,10 @@ module MeasReceiver
 
     # Fill time_from using previous measurement
     def storage_measurements_to_store(_indexes, _range)
+      # need to add @storage_last_i
       r = _indexes.collect { |is|
-        _from = self[is[0]]
-        _to = self[is[1]]
+        _from = self[is[0] + @storage_last_i]
+        _to = self[is[1] + @storage_last_i]
 
         _m = _from.clone
         _m[:time_from] = _m[:time]
