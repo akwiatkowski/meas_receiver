@@ -244,7 +244,7 @@ describe MeasReceiver::MeasTypeBuffer do
       sb[1][:raw].should == 580
       sb[2][:raw].should == 530
 
-      # add new values (2) + diff. treshold
+      # add new values (2) + diff. threshold
       new_values = [581] * 10 + [582] * 10 + [530] * 10
       new_values.each do |v|
         @b.add!(v)
@@ -254,18 +254,9 @@ describe MeasReceiver::MeasTypeBuffer do
 
       @b.perform_storage!
       sb = @b.storage_buffer
-      puts sb.to_yaml
-      #sb.size.should == 3
-      #sb[0][:raw].should == 500
-      #sb[1][:raw].should == 580
-      #sb[2][:raw].should == 530
-
-
-
-
-
-
-      
+      # puts sb.to_yaml
+      sb.size.should == 1
+      sb[0][:raw].should == 580
     end
   end
 
