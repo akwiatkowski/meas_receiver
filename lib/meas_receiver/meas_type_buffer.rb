@@ -61,6 +61,8 @@ module MeasReceiver
 
     # Average/mean raw within buffer
     def mean_raw(i, count = @storage[:avg_side_count])
+      return @buffer[i] if count == 0
+
       _from = i - count
       _to = i + count
 
@@ -115,19 +117,26 @@ module MeasReceiver
 
     # Check value deviation
     def storage_should_store_value?(value_a, value_b)
+      return true if value_a.nil? or value_b.nil?
       (value_a - value_b).abs > @storage[:value_deviation].to_f
     end
 
     # Store if value if different more than X and is newer tan Y, force when it is newer than Z
     def storage_should_store?(_value, _ref_value, _value_time, _ref_value_time)
-      (storage_should_store_value?(_ref_value, _value) and (_value_time - _ref_value_time) > @storage[:min_unit_interval]) or (_value_time - _ref_value_time) > @storage[:max_unit_interval]
+      _ref_value_nil = _ref_value.nil?
+      _value_diff = storage_should_store_value?(_ref_value, _value)
+      _time_min = (_value_time - _ref_value_time).abs > @storage[:min_unit_interval]
+      _time_max = (_value_time - _ref_value_time) > @storage[:max_unit_interval]
+      _r = ( _ref_value_nil or (_value_diff and _time_min) or _time_max )
+      # puts "#{_r} - v: #{_value}, #{_ref_value}, #{_value_time}, #{_ref_value_time} -> #{_ref_value_nil} or (#{_value_diff} and #{_time_min}) or #{_time_max}"
+      return _r
     end
 
     # Array of indexes measurements to store
     def storage_get_is_to_store(_values, _range)
       _array = Array.new
       _rel_time = _range.first
-      _ref_value = _values.first
+      _ref_value = nil
       _ref_value_rel_time = 0
 
       (0...(_values.size)).each do |_value_rel_time|
