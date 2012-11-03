@@ -59,6 +59,21 @@ module MeasReceiver
       self[@size - 1]
     end
 
+    # Get measurement index for given time
+    def index_by_time(_time)
+      return nil if _time < @time_from or _time > @time_to
+      return ((_time.to_f - @time_from.to_f)/interval.to_f).round
+    end
+
+    # Search measurement in buffer
+    def at(_time)
+      _i = index_by_time(_time)
+      return nil if _i.nil?
+      return self[_i]
+    end
+
+
+
     # Average/mean raw within buffer
     def mean_raw(i, count = @storage[:avg_side_count])
       return @buffer[i] if count == 0
