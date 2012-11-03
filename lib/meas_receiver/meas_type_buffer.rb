@@ -40,6 +40,7 @@ module MeasReceiver
     end
 
     def [](i)
+      return nil if i < 0 and i >= @size
       { time: @time_from + interval * i, raw: @buffer[i], value: raw_to_value(@buffer[i]) }
     end
 
@@ -71,8 +72,6 @@ module MeasReceiver
       return nil if _i.nil?
       return self[_i]
     end
-
-
 
     # Average/mean raw within buffer
     def mean_raw(i, count = @storage[:avg_side_count])
@@ -189,6 +188,12 @@ module MeasReceiver
     end
 
     ### CLEANING
+
+    # Clean measurements from buffer older than X seconds from last archived one
+    def clean_up!(_interval = 10*60)
+      _before_count = (_interval / self.interval).round
+      clean_up_stored!(_before_count)
+    end
 
     def clean_up_stored!(_before = 0)
       _i = @storage_last_i - _before

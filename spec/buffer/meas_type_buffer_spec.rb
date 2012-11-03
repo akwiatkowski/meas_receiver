@@ -312,6 +312,61 @@ describe MeasReceiver::MeasTypeBuffer do
       sb.size.should == 1
       sb[0][:raw].should == 580
     end
+
+
+    it "multiple detailed store + auto clean" do
+      values = [500] * 10 + [550] * 10 + [500] * 10
+      # should has 2 measurements later to store
+      # the last one is "not closed" by value change
+
+      values.each do |v|
+        @b.add!(v)
+      end
+      @b.time_from = Time.now - @b.buffer.size.to_f * @fetch_interval
+      @b.time_to = Time.now
+
+      @b.perform_storage!
+      sb = @b.storage_buffer
+
+      (sb[0][:time_to] - sb[0][:time_from]).should be_within(0.05).of(10)
+      sb[0][:time_from].should be_within(0.01).of(@b.time_from)
+      sb.size.should == 2
+      sb[0][:raw].should == 500
+      sb[1][:raw].should == 550
+
+      @b.clean_up!
+
+      # add new values
+      new_values = [580] * 10 + [530] * 10 + [580] * 10
+      new_values.each do |v|
+        @b.add!(v)
+      end
+      @b.time_from = Time.now - @b.buffer.size.to_f * @fetch_interval
+      @b.time_to = Time.now
+
+      @b.perform_storage!
+      sb = @b.storage_buffer
+      sb.size.should == 3
+      sb[0][:raw].should == 500
+      sb[1][:raw].should == 580
+      sb[2][:raw].should == 530
+
+      @b.clean_up!
+
+      # add new values (2) + diff. threshold
+      new_values = [581] * 10 + [582] * 10 + [530] * 10
+      new_values.each do |v|
+        @b.add!(v)
+      end
+      @b.time_from = Time.now - @b.buffer.size.to_f * @fetch_interval
+      @b.time_to = Time.now
+
+      @b.perform_storage!
+      sb = @b.storage_buffer
+      # puts sb.to_yaml
+      sb.size.should == 1
+      sb[0][:raw].should == 580
+    end
   end
 
 end
