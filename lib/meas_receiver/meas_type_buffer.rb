@@ -175,6 +175,12 @@ module MeasReceiver
 
     ### CLEANING
 
+    def clean_up_stored!(_before = 0)
+      _i = @storage_last_i - _before
+      _i = 0 if _i < 0
+      clean_up_to!(_i)
+    end
+
     # Remove everything before "i"
     def clean_up_to!(i)
       @mutex.synchronize do

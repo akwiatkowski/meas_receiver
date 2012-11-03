@@ -44,7 +44,7 @@ module MeasReceiver
 
     def fetch
       v = @comm_object.g
-      @meas_buffer.add(v)
+      @meas_buffer.add!(v)
       return v
     end
 
