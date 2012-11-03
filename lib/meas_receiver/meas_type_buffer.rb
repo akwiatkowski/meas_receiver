@@ -11,7 +11,7 @@ module MeasReceiver
       @coefficients = _meas_type.coefficients
       @storage = _meas_type.storage
       # index from which start storage algorithm
-      @storage_last_i = nil
+      @storage_last_i = 0
       # last storage buffer
       @storage_buffer = Array.new
 
@@ -168,6 +168,7 @@ module MeasReceiver
         _interval = self.interval
         @buffer = @buffer[i..-1]
         @size -= i
+        @storage_last_i -= i
         @time_from += _interval * i
       end
     end

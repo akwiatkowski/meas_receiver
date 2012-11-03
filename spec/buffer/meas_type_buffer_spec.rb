@@ -91,7 +91,7 @@ describe MeasReceiver::MeasTypeBuffer do
   #  @b.storage_buffer.size.should == 0
   #end
 
-  it "store measurements of predefined values with cleaning" do
+  it "clean" do
     # 3 significant changes
     partial_values = %w(512 513 515 515 514 515 515 516 517 518 550 551 552 555 553 545 510 512 522 515)
     values = partial_values * 10
@@ -105,7 +105,8 @@ describe MeasReceiver::MeasTypeBuffer do
 
     @b.storage_buffer.size.should == 0
 
-    _remove_index = partial_values.size * 9
+    # remove only first part
+    _remove_index = partial_values.size * 1
     _a = @b[_remove_index + 10]
     @b.clean_up_to!(_remove_index)
     _b = @b[10]
@@ -117,9 +118,17 @@ describe MeasReceiver::MeasTypeBuffer do
     _a[:time].should be_within(0.05).of(_b[:time])
 
 
-    #puts _a.inspect, _b.inspect
+    # remove more
+    _remove_index = partial_values.size * 3 + 5
+    _a = @b[_remove_index + 10]
+    @b.clean_up_to!(_remove_index)
+    _b = @b[10]
 
-    
+    [:value, :raw].each do |k|
+      _a[k].should == _b[k]
+    end
+    # there could be minimal time change
+    _a[:time].should be_within(0.05).of(_b[:time])
   end
 
 end
