@@ -175,10 +175,11 @@ describe MeasReceiver::MeasTypeBuffer do
 
   context "detailed" do
     before :each do
+      @fetch_interval = 1.0
       mc = {
         name: 'u_batt',
         unit: 'V',
-        fetch_interval: 0.2,
+        fetch_interval: @fetch_interval,
         command: ['0'],
         response_size: 2,
 
@@ -209,16 +210,17 @@ describe MeasReceiver::MeasTypeBuffer do
       @b = @m.meas_buffer
     end
     it "store, clean and store (2)" do
-      values = %w(500 500 500 500 500 500 500 500 500 500 550 550 550 550 550 550 550 550 550 550)
+      values = [500, 500] * 10 + [550] * 10
 
       values.each do |v|
-        @b.add(v.to_i)
+        @b.add(v)
       end
-      @b.time_from = Time.now - values.size.to_f * 0.1
+      @b.time_from = Time.now - values.size.to_f * @fetch_interval
       @b.time_to = Time.now
 
       @b.perform_storage
-      puts @b.storage_buffer.to_yaml
+      sb = @b.storage_buffer
+      (sb[0][:time_to] - sb[0][:time_from]).should == 10
 
     end
   end
