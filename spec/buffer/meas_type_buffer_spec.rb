@@ -203,14 +203,14 @@ describe MeasReceiver::MeasTypeBuffer do
             end
           }
         }
-
       }
 
       @m = MeasReceiver::MeasTypeReceiver.new(mc)
       @b = @m.meas_buffer
     end
+    
     it "store, clean and store (2)" do
-      values = [500, 500] * 10 + [550] * 10
+      values = [500] * 10 + [550] * 10 + [500] * 10
 
       values.each do |v|
         @b.add(v)
@@ -220,7 +220,10 @@ describe MeasReceiver::MeasTypeBuffer do
 
       @b.perform_storage
       sb = @b.storage_buffer
-      (sb[0][:time_to] - sb[0][:time_from]).should == 10
+
+      puts sb.to_yaml
+
+      (sb[0][:time_to] - sb[0][:time_from]).should be_within(0.05).of(10)
 
     end
   end

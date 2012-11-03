@@ -85,7 +85,7 @@ module MeasReceiver
     def perform_storage
       _range = storage_calculate_range
       _avg = storage_calculate_averaged(_range)
-      _indexes = storage_get_is_to_store(_avg, _range)
+      _indexes = storage_get_ranges_to_store(_avg, _range)
       _m = storage_measurements_to_store(_indexes, _range)
       @storage_buffer = _m
 
@@ -103,7 +103,6 @@ module MeasReceiver
     # Calculate range to storage algorithm
     def storage_calculate_range
       # from where continue
-      @storage_last_i = @storage_last_i.to_i
       _from = @storage_last_i
       # only check measurements up to
       _to = @buffer.size - 1
@@ -127,46 +126,46 @@ module MeasReceiver
       _value_diff = storage_should_store_value?(_ref_value, _value)
       _time_min = (_value_time - _ref_value_time).abs > @storage[:min_unit_interval]
       _time_max = (_value_time - _ref_value_time) > @storage[:max_unit_interval]
-      _r = ( _ref_value_nil or (_value_diff and _time_min) or _time_max )
+      _r = ((_value_diff and _time_min) or _time_max)
       # puts "#{_r} - v: #{_value}, #{_ref_value}, #{_value_time}, #{_ref_value_time} -> #{_ref_value_nil} or (#{_value_diff} and #{_time_min}) or #{_time_max}"
       return _r
     end
 
     # Array of indexes measurements to store
-    def storage_get_is_to_store(_values, _range)
+    def storage_get_ranges_to_store(_values, _range)
       _array = Array.new
-      _rel_time = _range.first
-      _ref_value = nil
-      _ref_value_rel_time = 0
 
-      (0...(_values.size)).each do |_value_rel_time|
-        _value = _values[_value_rel_time]
-        if storage_should_store?(_value, _ref_value, _value_rel_time, _ref_value_rel_time)
-          _array << _value_rel_time + _rel_time
+      _from = 0
+      _ref_value = _values.first
+
+      (0...(_values.size)).each do |_time|
+        _value = _values[_time]
+
+        if storage_should_store?(_value, _ref_value, _time, _from)
+          _array << [_from, _time]
+
+          _from = _time
           _ref_value = _value
-          _ref_value_rel_time = _value_rel_time
         end
       end
+
       return _array
     end
 
     # Fill time_from using previous measurement
     def storage_measurements_to_store(_indexes, _range)
-      _t = self[_range.first]
-      _m = _indexes.collect { |i| self[i] }
+      r = _indexes.collect { |is|
+        _from = self[is[0]]
+        _to = self[is[1]]
 
-      _m.each do |m|
-        m[:time_from] = _t[:time]
-        m[:time_to] = m[:time]
+        _m = _from.clone
+        _m[:time_from] = _m[:time]
+        _m[:time_to] = _to[:time]
+        _m.delete(:time)
 
-        _t = m
-      end
-
-      _m.each do |m|
-        m.delete(:time)
-      end
-
-      return _m
+        _m
+      }
+      return r
     end
 
     ### CLEANING
