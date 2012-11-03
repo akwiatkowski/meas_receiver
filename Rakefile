@@ -14,11 +14,11 @@ require 'rake'
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
   # gem is a Gem::Specification... see http://docs.rubygems.org/read/chapter/20 for more options
-  gem.name = "meas_receiver"
+  gem.name = "home_io_meas_receiver"
   gem.homepage = "http://github.com/akwiatkowski/meas_receiver"
   gem.license = "LGPLv3"
   gem.summary = %Q{Measurements receiver}
-  gem.description = %Q{Receive measurements.}
+  gem.description = %Q{Receive measurements from IoServer (part if HomeIO).}
   gem.email = "bobikx@poczta.fm"
   gem.authors = ["Aleksander Kwiatkowski"]
   # dependencies defined in Gemfile
