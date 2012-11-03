@@ -23,7 +23,7 @@ module MeasReceiver
 
     attr_accessor :buffer, :time_from, :time_to, :coefficients, :storage
 
-    attr_reader :storage_last_i, :storage_buffer
+    attr_reader :storage_last_i, :storage_buffer, :size
 
     # add raw value
     def add(v)

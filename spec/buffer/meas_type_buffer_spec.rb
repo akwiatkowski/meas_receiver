@@ -19,7 +19,7 @@ describe MeasReceiver::MeasTypeBuffer do
         min_time_interval: 0.5,
         max_time_interval: 3600,
 
-        avg_side_count: 4, # 3 before, this, and 3 after
+        avg_side_count: 4, # X before, this, and X after
         value_deviation: 0.8,
 
         # for testing proc execution
@@ -91,44 +91,84 @@ describe MeasReceiver::MeasTypeBuffer do
   #  @b.storage_buffer.size.should == 0
   #end
 
-  it "clean" do
-    # 3 significant changes
-    partial_values = %w(512 513 515 515 514 515 515 516 517 518 550 551 552 555 553 545 510 512 522 515)
-    values = partial_values * 10
-    # 9 last repeats will be cleaned
+  #it "clean" do
+  #  # 3 significant changes
+  #  partial_values = %w(512 513 515 515 514 515 515 516 517 518 550 551 552 555 553 545 510 512 522 515)
+  #  values = partial_values * 10
+  #  # 9 last repeats will be cleaned
+  #
+  #  values.each do |v|
+  #    @b.add(v.to_i)
+  #  end
+  #  @b.time_from = Time.now - values.count.to_f * 0.1
+  #  @b.time_to = Time.now
+  #
+  #  @b.storage_buffer.size.should == 0
+  #
+  #  # remove only first part
+  #  _remove_index = partial_values.size * 1
+  #  _a = @b[_remove_index + 10]
+  #  @b.clean_up_to!(_remove_index)
+  #  _b = @b[10]
+  #
+  #  [:value, :raw].each do |k|
+  #    _a[k].should == _b[k]
+  #  end
+  #  # there could be minimal time change
+  #  _a[:time].should be_within(0.05).of(_b[:time])
+  #
+  #
+  #  # remove more
+  #  _remove_index = partial_values.size * 3 + 5
+  #  _a = @b[_remove_index + 10]
+  #  @b.clean_up_to!(_remove_index)
+  #  _b = @b[10]
+  #
+  #  [:value, :raw].each do |k|
+  #    _a[k].should == _b[k]
+  #  end
+  #  # there could be minimal time change
+  #  _a[:time].should be_within(0.05).of(_b[:time])
+  #end
 
-    values.each do |v|
-      @b.add(v.to_i)
-    end
-    @b.time_from = Time.now - values.count.to_f * 0.1
-    @b.time_to = Time.now
-
-    @b.storage_buffer.size.should == 0
-
-    # remove only first part
-    _remove_index = partial_values.size * 1
-    _a = @b[_remove_index + 10]
-    @b.clean_up_to!(_remove_index)
-    _b = @b[10]
-
-    [:value, :raw].each do |k|
-      _a[k].should == _b[k]
-    end
-    # there could be minimal time change
-    _a[:time].should be_within(0.05).of(_b[:time])
-
-
-    # remove more
-    _remove_index = partial_values.size * 3 + 5
-    _a = @b[_remove_index + 10]
-    @b.clean_up_to!(_remove_index)
-    _b = @b[10]
-
-    [:value, :raw].each do |k|
-      _a[k].should == _b[k]
-    end
-    # there could be minimal time change
-    _a[:time].should be_within(0.05).of(_b[:time])
-  end
+  #it "store, clean and store" do
+  #  values = %w(512 513 515 520 522 528 531 535 556 540 550 560 563 552 541 530 515 505 499 498 497 501 506 509)
+  #
+  #  values.each do |v|
+  #    @b.add(v.to_i)
+  #  end
+  #  @b.time_from = Time.now - values.size.to_f * 0.1
+  #  @b.time_to = Time.now
+  #
+  #  @b.perform_storage
+  #  @b.storage_buffer.size.should == 4 # maybe
+  #  @b.storage_last_i.should < @b.size
+  #
+  #  #puts @b.storage_buffer.to_yaml
+  #  #puts @b.storage_last_i
+  #  #puts @b.size
+  #
+  #  new_values = %w(512 513 515 520 522 528 531 535 556 540 550 560 555)
+  #  new_values.each do |v|
+  #    @b.add(v.to_i)
+  #  end
+  #  @b.time_to += new_values.count.to_f * 0.1
+  #
+  #  # some cleaning
+  #  remove_count = 15
+  #  @b.clean_up_to!(remove_count)
+  #  # was 512 513 515 520 522 528 531 535 556 540 550 560 563 552 541 530 515 505 499 498 497 501 506 509 + 512 513 515 520 522 528 531 535 556 540 550 560 555
+  #  # is  --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
+  #  @b.first[:raw].should == 530
+  #  @b.size.should == (values.size + new_values.size - remove_count)
+  #
+  #  # and another storage
+  #  @b.perform_storage
+  #
+  #  #puts @b.storage_buffer.to_yaml
+  #  #puts @b.storage_last_i
+  #  #puts @b.size
+  #  # looks quite good... next spec will be more accurate
+  #end
 
 end
