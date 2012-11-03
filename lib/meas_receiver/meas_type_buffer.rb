@@ -17,6 +17,8 @@ module MeasReceiver
 
       @buffer = Array.new
       @size = 0
+
+      @mutex = Mutex.new
     end
 
     attr_accessor :buffer, :time_from, :time_to, :coefficients, :storage
@@ -25,10 +27,12 @@ module MeasReceiver
 
     # add raw value
     def add(v)
-      @size += 1
-      @buffer << v
-      @time_from ||= Time.now
-      @time_to = Time.now
+      @mutex.synchronize do
+        @size += 1
+        @buffer << v
+        @time_from ||= Time.now
+        @time_to = Time.now
+      end
     end
 
     def interval
@@ -72,6 +76,8 @@ module MeasReceiver
     def mean_value(i, count = @storage[:avg_side_count])
       raw_to_value(mean_raw(i, count))
     end
+
+    ### STORAGE
 
     # Executed by scheduler to store important values
     def perform_storage
@@ -152,6 +158,18 @@ module MeasReceiver
       end
 
       return _m
+    end
+
+    ### CLEANING
+
+    # Remove everything before "i"
+    def clean_up_to!(i)
+      @mutex.synchronize do
+        _interval = self.interval
+        @buffer = @buffer[i..-1]
+        @size -= i
+        @time_from += _interval * i
+      end
     end
 
   end

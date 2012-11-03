@@ -32,16 +32,14 @@ describe MeasReceiver::MeasTypeBuffer do
 
     }
 
-    # TODO: storage, clean
-
     @m = MeasReceiver::MeasTypeReceiver.new(mc)
     @b = @m.meas_buffer
   end
 
-  it "kind of" do
-    @b.should be_kind_of(MeasReceiver::MeasTypeBuffer)
-  end
-
+  #it "kind of" do
+  #  @b.should be_kind_of(MeasReceiver::MeasTypeBuffer)
+  #end
+  #
   #it "store measurements of long sine-like values" do
   #  count = 1000
   #  (0...count).each do |i|
@@ -66,10 +64,38 @@ describe MeasReceiver::MeasTypeBuffer do
   #  # perform storage
   #  @b.perform_storage
   #end
+  #
+  #it "store measurements of predefined values" do
+  #  # 3 significant changes
+  #  values = %w(512 513 515 515 514 515 515 516 517 518 550 550 550 555 550 545 510 512 522 515)
+  #
+  #  values.each do |v|
+  #    @b.add(v.to_i)
+  #  end
+  #  @b.time_from = Time.now - values.count.to_f * 0.1
+  #  @b.time_to = Time.now
+  #
+  #  @b.storage_buffer.size.should == 0
+  #
+  #  # perform storage
+  #  @b.perform_storage
+  #  @b.storage_buffer.size.should > 0
+  #  @b.storage_buffer.size.should == 3
+  #  @b.storage_buffer.each do |m|
+  #    # proc execution testing
+  #    m[:stored] == true
+  #  end
+  #
+  #  # next run without new measurements -> buffer should be empty
+  #  @b.perform_storage
+  #  @b.storage_buffer.size.should == 0
+  #end
 
-  it "store measurements of long sine-like values" do
+  it "store measurements of predefined values with cleaning" do
     # 3 significant changes
-    values = %w(512 513 515 515 514 515 515 516 517 518 550 550 550 555 550 545 510 512 522 515)
+    partial_values = %w(512 513 515 515 514 515 515 516 517 518 550 551 552 555 553 545 510 512 522 515)
+    values = partial_values * 10
+    # 9 last repeats will be cleaned
 
     values.each do |v|
       @b.add(v.to_i)
@@ -79,18 +105,21 @@ describe MeasReceiver::MeasTypeBuffer do
 
     @b.storage_buffer.size.should == 0
 
-    # perform storage
-    @b.perform_storage
-    @b.storage_buffer.size.should > 0
-    @b.storage_buffer.size.should == 3
-    @b.storage_buffer.each do |m|
-      # proc execution testing
-      m[:stored] == true
-    end
+    _remove_index = partial_values.size * 9
+    _a = @b[_remove_index + 10]
+    @b.clean_up_to!(_remove_index)
+    _b = @b[10]
 
-    # next run without new measurements -> buffer should be empty
-    @b.perform_storage
-    @b.storage_buffer.size.should == 0
+    [:value, :raw].each do |k|
+      _a[k].should == _b[k]
+    end
+    # there could be minimal time change
+    _a[:time].should be_within(0.05).of(_b[:time])
+
+
+    #puts _a.inspect, _b.inspect
+
+    
   end
 
 end
