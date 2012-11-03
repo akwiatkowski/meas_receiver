@@ -12,6 +12,8 @@ module MeasReceiver
       @storage = _meas_type.storage
       # index from which start storage algorithm
       @storage_last_i = nil
+      # last storage buffer
+      @storage_buffer = Array.new
 
       @buffer = Array.new
       @size = 0
@@ -19,7 +21,7 @@ module MeasReceiver
 
     attr_accessor :buffer, :time_from, :time_to, :coefficients, :storage
 
-    attr_reader :storage_last_i
+    attr_reader :storage_last_i, :storage_buffer
 
     # add raw value
     def add(v)
@@ -77,11 +79,17 @@ module MeasReceiver
       _avg = storage_calculate_averaged(_range)
       _indexes = storage_get_is_to_store(_avg, _range)
       _m = storage_measurements_to_store(_indexes, _range)
-
-      puts _m.inspect
+      @storage_buffer = _m
 
       # mark from where continue next time
       @storage_last_i = _indexes.last
+
+      # call proc
+      if @storage[:proc]
+        @storage[:proc].call(@storage_buffer)
+      end
+
+      return @storage_buffer
     end
 
     # Calculate range to storage algorithm

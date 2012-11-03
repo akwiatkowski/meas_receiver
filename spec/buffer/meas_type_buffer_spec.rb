@@ -20,7 +20,14 @@ describe MeasReceiver::MeasTypeBuffer do
         max_time_interval: 3600,
 
         avg_side_count: 4, # 3 before, this, and 3 after
-        value_deviation: 0.8
+        value_deviation: 0.8,
+
+        # for testing proc execution
+        proc: Proc.new { |ms|
+          ms.each do |m|
+            m[:stored] = true
+          end
+        }
       }
 
     }
@@ -61,8 +68,8 @@ describe MeasReceiver::MeasTypeBuffer do
   #end
 
   it "store measurements of long sine-like values" do
-    values = %w(512 513 515 515 514 515 515 516 517 518 550 550 550 555)
-    values *= 10
+    # 3 significant changes
+    values = %w(512 513 515 515 514 515 515 516 517 518 550 550 550 555 550 545 510 512 522 515)
 
     values.each do |v|
       @b.add(v.to_i)
@@ -70,8 +77,20 @@ describe MeasReceiver::MeasTypeBuffer do
     @b.time_from = Time.now - values.count.to_f * 0.1
     @b.time_to = Time.now
 
+    @b.storage_buffer.size.should == 0
+
     # perform storage
     @b.perform_storage
+    @b.storage_buffer.size.should > 0
+    @b.storage_buffer.size.should == 3
+    @b.storage_buffer.each do |m|
+      # proc execution testing
+      m[:stored] == true
+    end
+
+    # next run without new measurements -> buffer should be empty
+    @b.perform_storage
+    @b.storage_buffer.size.should == 0
   end
 
 end
