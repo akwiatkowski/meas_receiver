@@ -45,7 +45,7 @@ describe MeasReceiver::MeasTypeBuffer do
   #    count = 1000
   #    (0...count).each do |i|
   #      v = 512 + (Math.sin(i.to_f / 20.0) * 64.0).round
-  #      @b.add(v)
+  #      @b.add!(v)
   #    end
   #    @b.time_from = Time.now - count.to_f * 0.2
   #    @b.time_to = Time.now
@@ -63,7 +63,7 @@ describe MeasReceiver::MeasTypeBuffer do
   #    @b.first[:value].should be_kind_of(Float)
   #
   #    # perform storage
-  #    @b.perform_storage
+  #    @b.perform_storage!
   #  end
   #
   #  it "store measurements of predefined values" do
@@ -71,7 +71,7 @@ describe MeasReceiver::MeasTypeBuffer do
   #    values = %w(512 513 515 515 514 515 515 516 517 518 550 550 550 555 550 545 510 512 522 515)
   #
   #    values.each do |v|
-  #      @b.add(v.to_i)
+  #      @b.add!(v.to_i)
   #    end
   #    @b.time_from = Time.now - values.count.to_f * 0.1
   #    @b.time_to = Time.now
@@ -79,7 +79,7 @@ describe MeasReceiver::MeasTypeBuffer do
   #    @b.storage_buffer.size.should == 0
   #
   #    # perform storage
-  #    @b.perform_storage
+  #    @b.perform_storage!
   #    @b.storage_buffer.size.should > 0
   #    @b.storage_buffer.size.should == 3
   #    @b.storage_buffer.each do |m|
@@ -88,7 +88,7 @@ describe MeasReceiver::MeasTypeBuffer do
   #    end
   #
   #    # next run without new measurements -> buffer should be empty
-  #    @b.perform_storage
+  #    @b.perform_storage!
   #    @b.storage_buffer.size.should == 0
   #  end
   #
@@ -99,7 +99,7 @@ describe MeasReceiver::MeasTypeBuffer do
   #    # 9 last repeats will be cleaned
   #
   #    values.each do |v|
-  #      @b.add(v.to_i)
+  #      @b.add!(v.to_i)
   #    end
   #    @b.time_from = Time.now - values.count.to_f * 0.1
   #    @b.time_to = Time.now
@@ -136,12 +136,12 @@ describe MeasReceiver::MeasTypeBuffer do
   #    values = %w(512 513 515 520 522 528 531 535 556 540 550 560 563 552 541 530 515 505 499 498 497 501 506 509)
   #
   #    values.each do |v|
-  #      @b.add(v.to_i)
+  #      @b.add!(v.to_i)
   #    end
   #    @b.time_from = Time.now - values.size.to_f * 0.1
   #    @b.time_to = Time.now
   #
-  #    @b.perform_storage
+  #    @b.perform_storage!
   #    @b.storage_buffer.size.should == 4 # maybe
   #    @b.storage_last_i.should < @b.size
   #
@@ -151,7 +151,7 @@ describe MeasReceiver::MeasTypeBuffer do
   #
   #    new_values = %w(512 513 515 520 522 528 531 535 556 540 550 560 555)
   #    new_values.each do |v|
-  #      @b.add(v.to_i)
+  #      @b.add!(v.to_i)
   #    end
   #    @b.time_to += new_values.count.to_f * 0.1
   #
@@ -164,7 +164,7 @@ describe MeasReceiver::MeasTypeBuffer do
   #    @b.size.should == (values.size + new_values.size - remove_count)
   #
   #    # and another storage
-  #    @b.perform_storage
+  #    @b.perform_storage!
   #
   #    #puts @b.storage_buffer.to_yaml
   #    #puts @b.storage_last_i
@@ -215,12 +215,12 @@ describe MeasReceiver::MeasTypeBuffer do
       # the last one is "not closed" by value change
 
       values.each do |v|
-        @b.add(v)
+        @b.add!(v)
       end
       @b.time_from = Time.now - @b.buffer.size.to_f * @fetch_interval
       @b.time_to = Time.now
 
-      @b.perform_storage
+      @b.perform_storage!
       sb = @b.storage_buffer
 
       (sb[0][:time_to] - sb[0][:time_from]).should be_within(0.05).of(10)
@@ -232,27 +232,27 @@ describe MeasReceiver::MeasTypeBuffer do
       # add new values
       new_values = [580] * 10 + [530] * 10 + [580] * 10
       new_values.each do |v|
-        @b.add(v)
+        @b.add!(v)
       end
       @b.time_from = Time.now - @b.buffer.size.to_f * @fetch_interval
       @b.time_to = Time.now
 
-      @b.perform_storage
+      @b.perform_storage!
       sb = @b.storage_buffer
       sb.size.should == 3
       sb[0][:raw].should == 500
       sb[1][:raw].should == 580
       sb[2][:raw].should == 530
 
-      # add new values (2)
-      new_values = [580] * 10
+      # add new values (2) + diff. treshold
+      new_values = [581] * 10 + [582] * 10 + [530] * 10
       new_values.each do |v|
-      #  @b.add(v)
+        @b.add!(v)
       end
       @b.time_from = Time.now - @b.buffer.size.to_f * @fetch_interval
       @b.time_to = Time.now
 
-      @b.perform_storage
+      @b.perform_storage!
       sb = @b.storage_buffer
       puts sb.to_yaml
       #sb.size.should == 3

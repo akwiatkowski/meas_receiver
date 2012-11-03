@@ -26,7 +26,7 @@ module MeasReceiver
     attr_reader :storage_last_i, :storage_buffer, :size
 
     # add raw value
-    def add(v)
+    def add!(v)
       @mutex.synchronize do
         @size += 1
         @buffer << v
@@ -82,23 +82,26 @@ module MeasReceiver
     ### STORAGE
 
     # Executed by scheduler to store important values
-    def perform_storage
-      _range = storage_calculate_range
-      _avg = storage_calculate_averaged(_range)
-      _indexes = storage_get_ranges_to_store(_avg, _range)
-      _m = storage_measurements_to_store(_indexes, _range)
-      @storage_buffer = _m
+    def perform_storage!
+      @mutex.synchronize do
+        _range = storage_calculate_range
+        _avg = storage_calculate_averaged(_range)
+        _indexes = storage_get_ranges_to_store(_avg, _range)
+        _m = storage_measurements_to_store(_indexes, _range)
+        @storage_buffer = _m
 
-      # mark from where continue next time, it is r
-      puts _indexes.inspect
-      @storage_last_i = _indexes.last[1]
+        # mark from where continue next time, it is r
+        if _indexes.size > 0
+          @storage_last_i = _indexes.last[1] + @storage_last_i.to_i
+        end
 
-      # call proc
-      if @storage[:proc]
-        @storage[:proc].call(@storage_buffer)
+        # call proc
+        if @storage[:proc]
+          @storage[:proc].call(@storage_buffer)
+        end
+
+        return @storage_buffer
       end
-
-      return @storage_buffer
     end
 
     # Calculate range to storage algorithm
