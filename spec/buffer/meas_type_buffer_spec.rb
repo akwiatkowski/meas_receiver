@@ -35,30 +35,43 @@ describe MeasReceiver::MeasTypeBuffer do
     @b.should be_kind_of(MeasReceiver::MeasTypeBuffer)
   end
 
-  it "store values" do
-    count = 1000
-    (0...count).each do |i|
-      v = 512 + (Math.sin(i.to_f / 20.0) * 64.0).round
-      @b.add(v)
+  #it "store measurements of long sine-like values" do
+  #  count = 1000
+  #  (0...count).each do |i|
+  #    v = 512 + (Math.sin(i.to_f / 20.0) * 64.0).round
+  #    @b.add(v)
+  #  end
+  #  @b.time_from = Time.now - count.to_f * 0.2
+  #  @b.time_to = Time.now
+  #
+  #  # interval
+  #  @b.interval.should be_within(0.01).of(0.2)
+  #
+  #  # times, first and last
+  #  @b.first[:time].should be_within(0.5).of(@b.time_from)
+  #  @b.last[:time].should be_within(0.5).of(@b.time_to)
+  #
+  #  # time, raw and value
+  #  @b.first[:time].should be_kind_of(Time)
+  #  @b.first[:raw].should be_kind_of(Fixnum)
+  #  @b.first[:value].should be_kind_of(Float)
+  #
+  #  # perform storage
+  #  @b.perform_storage
+  #end
+
+  it "store measurements of long sine-like values" do
+    values = %w(512 513 515 515 514 515 515 516 517 518 550 550 550 555)
+    values *= 10
+
+    values.each do |v|
+      @b.add(v.to_i)
     end
-    @b.time_from = Time.now - count.to_f * 0.2
+    @b.time_from = Time.now - values.count.to_f * 0.1
     @b.time_to = Time.now
-
-    # interval
-    @b.interval.should be_within(0.01).of(0.2)
-
-    # times, first and last
-    @b.first[:time].should be_within(0.5).of(@b.time_from)
-    @b.last[:time].should be_within(0.5).of(@b.time_to)
-
-    # time, raw and value
-    @b.first[:time].should be_kind_of(Time)
-    @b.first[:raw].should be_kind_of(Fixnum)
-    @b.first[:value].should be_kind_of(Float)
 
     # perform storage
     @b.perform_storage
-    puts @b.storage_last_i
-
   end
+
 end

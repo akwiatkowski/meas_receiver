@@ -81,7 +81,7 @@ module MeasReceiver
       puts _m.inspect
 
       # mark from where continue next time
-      @storage_last_i = current_last_i
+      #@storage_last_i = current_last_i
     end
 
     # Calculate range to storage algorithm
