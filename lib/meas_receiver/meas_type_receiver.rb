@@ -48,6 +48,14 @@ module MeasReceiver
       return v
     end
 
+    def store
+      @meas_buffer.perform_storage!
+    end
+
+    def clean
+      @meas_buffer.clean_up!
+    end
+
     attr_reader :meas_buffer
 
     def [](i)
