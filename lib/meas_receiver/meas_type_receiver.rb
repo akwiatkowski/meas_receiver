@@ -24,6 +24,7 @@ module MeasReceiver
       @storage[:min_unit_interval] = (@storage[:min_time_interval] / @fetch_interval).floor
       @storage[:max_time_interval] ||= 3600
       @storage[:max_unit_interval] = (@storage[:max_time_interval] / @fetch_interval).floor
+      @storage[:store_interval] ||= 10*60 #2*3600
 
       @comm_object = CommProtocol.new(@command, @response_size)
       @meas_buffer = MeasTypeBuffer.new(self)
@@ -36,6 +37,10 @@ module MeasReceiver
       @scheduler.every "#{@fetch_interval}s" do
         fetch
       end
+
+      @scheduler.every "#{@storage[:store_interval]}s" do
+        store
+      end
     end
 
     def stop
@@ -44,6 +49,7 @@ module MeasReceiver
 
     def fetch
       v = @comm_object.g
+      puts v
       @meas_buffer.add!(v)
       return v
     end

@@ -5,7 +5,7 @@ describe MeasReceiver::MeasTypeBuffer do
     MeasReceiver::CommProtocol.host = '192.168.0.13'
     MeasReceiver::CommProtocol.port = '2002'
 
-    @fetch_interval = 1.0
+    @fetch_interval = 0.2
     mc = {
       name: 'u_batt',
       unit: 'V',
@@ -24,23 +24,23 @@ describe MeasReceiver::MeasTypeBuffer do
         max_time_interval: 2.0,
 
         avg_side_count: 0, # X before, this, and X after
-        value_deviation: 0.5,
+        value_deviation: 0.1,
 
-        # for testing proc execution
-        proc: Proc.new { |ms|
-          ms.each do |m|
-            m[:stored] = true
-          end
-        }
+        store_interval: 1.0
       }
     }
 
     @m = MeasReceiver::MeasTypeReceiver.new(mc)
   end
 
-  it "local test" do
+  it "local test (single fetch)" do
     @m.fetch
     puts @m.last.inspect
+  end
+
+  it "local test (start)" do
+    @m.start
+    sleep 5
   end
 
 end
