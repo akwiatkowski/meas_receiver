@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "home_io_meas_receiver"
-  s.version = "0.0.0"
+  s.version = "0.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Aleksander Kwiatkowski"]
-  s.date = "2012-11-04"
+  s.date = "2012-12-16"
   s.description = "Receive measurements from IoServer (part if HomeIO)."
   s.email = "bobikx@poczta.fm"
   s.extra_rdoc_files = [
@@ -26,8 +26,7 @@ Gem::Specification.new do |s|
     "lib/meas_receiver.rb",
     "lib/meas_receiver/comm_protocol.rb",
     "lib/meas_receiver/meas_type_buffer.rb",
-    "lib/meas_receiver/meas_type_receiver.rb",
-    "lib/meas_receiver/receiver.rb"
+    "lib/meas_receiver/meas_type_receiver.rb"
   ]
   s.homepage = "http://github.com/akwiatkowski/meas_receiver"
   s.licenses = ["LGPLv3"]
@@ -41,6 +40,7 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<rufus-scheduler>, [">= 0"])
       s.add_runtime_dependency(%q<mean>, [">= 0"])
+      s.add_runtime_dependency(%q<colorize>, [">= 0"])
       s.add_development_dependency(%q<rspec>, ["~> 2.3.0"])
       s.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.6.4"])
@@ -48,6 +48,7 @@ Gem::Specification.new do |s|
     else
       s.add_dependency(%q<rufus-scheduler>, [">= 0"])
       s.add_dependency(%q<mean>, [">= 0"])
+      s.add_dependency(%q<colorize>, [">= 0"])
       s.add_dependency(%q<rspec>, ["~> 2.3.0"])
       s.add_dependency(%q<bundler>, ["~> 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
@@ -56,6 +57,7 @@ Gem::Specification.new do |s|
   else
     s.add_dependency(%q<rufus-scheduler>, [">= 0"])
     s.add_dependency(%q<mean>, [">= 0"])
+    s.add_dependency(%q<colorize>, [">= 0"])
     s.add_dependency(%q<rspec>, ["~> 2.3.0"])
     s.add_dependency(%q<bundler>, ["~> 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.6.4"])
