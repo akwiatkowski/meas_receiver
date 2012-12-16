@@ -2,6 +2,7 @@ source "http://rubygems.org"
 
 gem "rufus-scheduler"
 gem "mean"
+gem 'colorize'
 
 group :development do
   gem "rspec", "~> 2.3.0"

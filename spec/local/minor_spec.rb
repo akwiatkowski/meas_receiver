@@ -1,8 +1,9 @@
 require 'spec_helper'
+require 'logger'
 
 describe MeasReceiver::MeasTypeBuffer do
   before :each do
-    MeasReceiver::CommProtocol.host = '192.168.0.13'
+    MeasReceiver::CommProtocol.host = '192.168.0.7'
     MeasReceiver::CommProtocol.port = '2002'
 
     @fetch_interval = 0.2
@@ -27,20 +28,25 @@ describe MeasReceiver::MeasTypeBuffer do
         value_deviation: 0.1,
 
         store_interval: 1.0
+      },
+
+      logger: {
+        level: Logger::DEBUG,
+        output: STDOUT
       }
     }
 
     @m = MeasReceiver::MeasTypeReceiver.new(mc)
   end
 
-  it "local test (single fetch)" do
-    @m.fetch
-    puts @m.last.inspect
-  end
+  #it "local test (single fetch)" do
+  #  @m.fetch
+  #  puts @m.last.inspect
+  #end
 
   it "local test (start)" do
     @m.start
-    sleep 5
+    sleep 20
   end
 
 end

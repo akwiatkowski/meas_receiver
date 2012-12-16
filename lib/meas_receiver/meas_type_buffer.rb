@@ -7,6 +7,9 @@ module MeasReceiver
   class MeasTypeBuffer
     def initialize(_meas_type)
       @meas_type = _meas_type
+      @logger = @meas_type.logger
+      @debug = @meas_type.debug
+      @name = @meas_type.name
 
       @coefficients = _meas_type.coefficients
       @storage = _meas_type.storage
@@ -22,8 +25,7 @@ module MeasReceiver
     end
 
     attr_accessor :buffer, :time_from, :time_to, :coefficients, :storage
-
-    attr_reader :storage_last_i, :storage_buffer, :size
+    attr_reader :storage_last_i, :storage_buffer, :size, :name
 
     # add raw value
     def add!(v)
@@ -32,6 +34,8 @@ module MeasReceiver
         @buffer << v
         @time_from ||= Time.now
         @time_to = Time.now
+
+        @logger.debug("Added #{v.to_s.yellow} to buffer, size #{@size.to_s.blue}") if @debug
       end
     end
 
@@ -98,6 +102,8 @@ module MeasReceiver
     # Executed by scheduler to store important values
     def perform_storage!
       @mutex.synchronize do
+        @logger.debug("Performing storage for #{self.name.red}") if @debug
+
         _range = storage_calculate_range
         _avg = storage_calculate_averaged(_range)
         _indexes = storage_get_ranges_to_store(_avg, _range)
@@ -110,9 +116,12 @@ module MeasReceiver
         end
 
         # call proc
+        @logger.debug("Storage buffer size is #{@storage_buffer.size.to_s.cyan}") if @debug
         if @storage[:proc]
           @storage[:proc].call(@storage_buffer)
         end
+
+        @logger.debug("Storage completed for #{self.name.red}") if @debug
 
         return @storage_buffer
       end
@@ -124,6 +133,9 @@ module MeasReceiver
       _from = @storage_last_i
       # only check measurements up to
       _to = @buffer.size - 1
+
+      @logger.debug("Range to store #{_from.to_s.magenta}..#{_to.to_s.magenta}") if @debug
+      
       return _from.._to
     end
 

@@ -1,3 +1,5 @@
+require 'logger'
+require 'colorize'
 require 'rufus/scheduler'
 require 'meas_receiver/meas_type_buffer'
 
@@ -11,15 +13,23 @@ module MeasReceiver
     def initialize(_options)
       @options = _options
 
+      @options[:logger] ||= Hash.new
+      @options[:logger][:output] ||= STDOUT
+      @options[:logger][:level] ||= Logger::INFO
+      @logger = Logger.new(@options[:logger][:output])
+      @logger.level = @options[:logger][:level]
+      @debug = (@options[:logger][:level] == Logger::DEBUG)
+
       @fetch_interval = _options[:fetch_interval] || DEFAULT_FETCH_INTERVAL
       @fetch_interval = MIN_FETCH_INTERVAL if @fetch_interval < MIN_FETCH_INTERVAL
 
-      @command = _options[:command]
-      @response_size = _options[:response_size]
-      @coefficients = _options[:coefficients] || Hash.new
+      @name = @options[:name]
+      @command = @options[:command]
+      @response_size = @options[:response_size]
+      @coefficients = @options[:coefficients] || Hash.new
       @coefficients[:linear] ||= 1.0
       @coefficients[:offset] ||= 0.0
-      @storage = _options[:storage] || Hash.new
+      @storage = @options[:storage] || Hash.new
       @storage[:min_time_interval] ||= @fetch_interval
       @storage[:min_unit_interval] = (@storage[:min_time_interval] / @fetch_interval).floor
       @storage[:max_time_interval] ||= 3600
@@ -30,9 +40,11 @@ module MeasReceiver
       @meas_buffer = MeasTypeBuffer.new(self)
     end
 
-    attr_reader :fetch_interval, :command, :response_size, :coefficients, :storage
+    attr_reader :fetch_interval, :command, :response_size, :coefficients, :storage, :name, :logger, :debug
 
     def start
+      @logger.debug("MeasReceiver started for #{self.name.red}") if @debug
+
       @scheduler = Rufus::Scheduler.start_new(frequency: SCH_MIN_INTERVAL)
       @scheduler.every "#{@fetch_interval}s" do
         fetch
@@ -45,12 +57,15 @@ module MeasReceiver
 
     def stop
       @scheduler.stop
+      @logger.debug("MeasReceiver stopped for #{self.name.red}") if @debug
     end
 
     def fetch
       v = @comm_object.g
-      puts v
       @meas_buffer.add!(v)
+
+      @logger.debug("Fetched #{self.name.red} = #{v.to_s.yellow}") if @debug
+
       return v
     end
 
