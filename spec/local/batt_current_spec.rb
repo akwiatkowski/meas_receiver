@@ -1,0 +1,44 @@
+require 'spec_helper'
+require 'logger'
+
+describe MeasReceiver::MeasTypeBuffer do
+  before :each do
+    MeasReceiver::CommProtocol.host = '192.168.0.13'
+    MeasReceiver::CommProtocol.port = '2002'
+
+    @fetch_interval = 0.2
+    mc = {
+      name: 'i_gen_batt',
+      unit: 'A',
+      storage: {
+        proc: Proc.new { |d| puts "store start"; sleep 4; puts "store - #{d.inspect}" },
+        min_time_interval: 0.5,
+        max_time_interval: 3600,
+
+        avg_side_count: 10,
+        value_deviation: 1.0,
+
+        store_interval: 5
+      },
+
+      command: ['4'],
+      response_size: 2,
+      coefficients: {
+        linear: 0.191,
+        offset: -512
+      },
+
+      after_proc:  Proc.new { |d| puts "fetch - #{d.inspect}" },
+    }
+
+    @m = MeasReceiver::MeasTypeReceiver.new(mc)
+  end
+
+  it "local test (start)" do
+    @m.start
+    sleep 20
+  end
+
+end
+
+

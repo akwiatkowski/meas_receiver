@@ -59,7 +59,7 @@ module MeasReceiver
     end
 
     def raw_to_value(raw)
-      _r = raw.to_f * @coefficients[:linear].to_f + @coefficients[:offset]
+      _r = (raw.to_f + @coefficients[:offset].to_f) * @coefficients[:linear].to_f
       if @coefficients[:proc]
         _r = @coefficients[:proc].call(_r)
       end
