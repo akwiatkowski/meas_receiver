@@ -11,7 +11,7 @@ describe MeasReceiver::MeasTypeBuffer do
       name: 'batt_u',
       unit: 'V',
       storage: {
-        proc: Proc.new { |d| sleep 5; puts "store - #{d.inspect}" },
+        proc: Proc.new { |d| puts "store start"; sleep 4; puts "store - #{d.inspect}" },
         min_time_interval: 0.5,
         max_time_interval: 3600,
 
