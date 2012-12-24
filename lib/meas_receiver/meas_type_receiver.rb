@@ -10,6 +10,8 @@ module MeasReceiver
     DEFAULT_FETCH_INTERVAL = 0.5
     MIN_FETCH_INTERVAL = 0.1
 
+    # TODO convert all keys to Symbols
+
     def initialize(_options)
       @options = _options
 
@@ -29,6 +31,7 @@ module MeasReceiver
       @coefficients = @options[:coefficients] || Hash.new
       @coefficients[:linear] ||= 1.0
       @coefficients[:offset] ||= 0.0
+      @after_proc = @options[:after_proc]
       @storage = @options[:storage] || Hash.new
       @storage[:min_time_interval] ||= @fetch_interval
       @storage[:min_unit_interval] = (@storage[:min_time_interval] / @fetch_interval).floor
@@ -40,7 +43,7 @@ module MeasReceiver
       @meas_buffer = MeasTypeBuffer.new(self)
     end
 
-    attr_reader :fetch_interval, :command, :response_size, :coefficients, :storage, :name, :logger, :debug
+    attr_reader :fetch_interval, :command, :response_size, :coefficients, :storage, :name, :logger, :debug, :after_proc
 
     def start
       @logger.debug("MeasReceiver started for #{self.name.red}") if @debug

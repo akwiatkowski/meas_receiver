@@ -12,6 +12,7 @@ module MeasReceiver
       @name = @meas_type.name
 
       @coefficients = _meas_type.coefficients
+      @after_proc = _meas_type.after_proc
       @storage = _meas_type.storage
       # index from which start storage algorithm
       @storage_last_i = 0
@@ -36,6 +37,15 @@ module MeasReceiver
         @time_to = Time.now
 
         @logger.debug("Added #{v.to_s.yellow} to buffer, size #{@size.to_s.blue}") if @debug
+      end
+
+      after_add
+    end
+
+    # Execute proc using last fetched measurement
+    def after_add
+      unless @after_proc.nil?
+        @after_proc.call(self.last)
       end
     end
 
@@ -78,7 +88,7 @@ module MeasReceiver
     end
 
     # Average/mean raw within buffer
-    def mean_raw(i, count = @storage[:avg_side_count])
+    def mean_raw(i, count = @storage[:avg_side_count].to_i)
       return @buffer[i] if count == 0
 
       _from = i - count
