@@ -113,6 +113,7 @@ module MeasReceiver
     def perform_storage!
       @mutex.synchronize do
         @logger.debug("Performing storage for #{self.name.red}") if @debug
+        t = Time.now
 
         _range = storage_calculate_range
         _avg = storage_calculate_averaged(_range)
@@ -125,16 +126,18 @@ module MeasReceiver
           @storage_last_i = _indexes.last[1] + @storage_last_i.to_i
         end
 
-        # call proc
-        @logger.debug("Storage buffer size is #{@storage_buffer.size.to_s.cyan}") if @debug
-        if @storage[:proc]
-          @storage[:proc].call(@storage_buffer)
-        end
-
-        @logger.debug("Storage completed for #{self.name.red}") if @debug
-
-        return @storage_buffer
+        @logger.debug("Storage buffer created in #{(Time.now - t).to_s.green}") if @debug
+        # after this mutex is not needed
       end
+
+      # call proc
+      @logger.debug("Storage buffer size is #{@storage_buffer.size.to_s.cyan}") if @debug
+      if @storage[:proc]
+        @storage[:proc].call(@storage_buffer)
+      end
+      @logger.debug("Storage completed for #{self.name.red}") if @debug
+
+      return @storage_buffer
     end
 
     # Calculate range to storage algorithm
@@ -145,7 +148,7 @@ module MeasReceiver
       _to = @buffer.size - 1
 
       @logger.debug("Range to store #{_from.to_s.magenta}..#{_to.to_s.magenta}") if @debug
-      
+
       return _from.._to
     end
 
