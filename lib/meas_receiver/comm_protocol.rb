@@ -29,6 +29,16 @@ module MeasReceiver
       @@host = _host
     end
 
+    def self.port
+      return nil unless defined? @@port
+      return @@port
+    end
+
+    def self.host
+      return nil unless defined? @@host
+      return @@host
+    end
+
     # Create String command to IoServer and send it
     def self.create_send_command(command_array, response_size, hostname = @@host, port = @@port)
       str = prepare_command_string(command_array, response_size)
